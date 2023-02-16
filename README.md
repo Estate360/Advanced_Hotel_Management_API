@@ -7,4 +7,4 @@ Here;
 2. I went further to build a system of USERS, assigning the role of GUEST and ADMIN to them.
 3. I further more ensured that I the Authentication and Authorization middleware is second to none by efficiently applying bcrypt, jwt and joi.
 
-###MORE UPDATE COMING SOON!
+### MORE UPDATE COMING SOON!
