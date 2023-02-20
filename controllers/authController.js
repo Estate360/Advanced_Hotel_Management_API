@@ -1,8 +1,16 @@
+const Joi = require("joi");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
 const { catchAsync } = require("../utils/catchAsync");
 const { User, userValidator } = require("../models/user");
 const AppErrorHandler = require("../utils/AppErrorHandler");
+
+// const signToken = function (id) {
+//   return jwt.sign({ id }, process.env.JWT_PRIVATE_KEY, {
+//     expiresIn: process.env.JWT_EXPIRES_IN,
+//   });
+// };
 
 exports.register = catchAsync(async (req, res, next) => {
   const { error } = await userValidator.validateAsync(req.body, {
@@ -25,12 +33,12 @@ exports.register = catchAsync(async (req, res, next) => {
     confirmPassword: req.body.confirmPassword,
   });
   newUser.password = undefined;
+  newUser.confirmPassword = undefined;
 
   // Return token
   const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
-  res.json({ token });
   console.log(token);
 
   res.status(201).json({
@@ -42,23 +50,37 @@ exports.register = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.login = catchAsync(async (req, res) => {
+exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
+
+  //validate user
+  const schema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+  });
+
+  const { error } = schema.validateAsync(req.body, {
+    abortEarly: false,
+  });
+  if (error) return next(new AppErrorHandler(error.details[0].message, 400));
 
   // Check if user exists
   const user = await User.findOne({ email }).select("+password");
-  if (!user) {
-    return res.status(401).json({ error: "Invalid email or password" });
-  }
+  if (!user)
+    return next(new AppErrorHandler("Invalid email or password!", 401));
 
   // Check password
-  if (!user || !(await user.checkCorrectPassword(password, user.password)))
+  const matchPassword = await bcrypt.compare(password, user.password);
+  if (!matchPassword) {
     return next(new AppErrorHandler("Invalid email or password", 401));
+  }
 
   //If all is correct, return token
-  const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
+  user.password = undefined;
+
   res.json({ token });
 });
 
@@ -75,16 +97,13 @@ exports.protect = catchAsync(async (req, res, next) => {
   if (!token)
     return next(
       new AppErrorHandler(
-        "You are not logged in, please login to get access",
+        "You are not logged in, please provide your token to gain access",
         401
       )
     );
 
   //2) Verification token
-  const decoded = await promisify(jwt.verify)(
-    token,
-    process.env.JWT_PRIVATE_KEY
-  );
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   if (!decoded) {
     return next(
       new AppErrorHandler("You are not logged in, please login", 401)
@@ -97,10 +116,9 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 exports.restrictTo =
   (...roles) =>
-  async (req, res, next) => {
-    //roles can be ["admin"] or anyone with higher authority other than that of a user.
-    //by default, role="user"
-    if (!roles.includes(req.user.role)) {
+  (req, res, next) => {
+    //by default, role="guest"
+    if (!roles.includes(req.guest.role)) {
       return next(
         new AppErrorHandler(
           "You do not have permission to perform this action",

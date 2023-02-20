@@ -17,7 +17,7 @@ app.use(express.json()); // Use JSON parser middleware
 app.use(express.urlencoded());
 
 // Routes Middleware
-app.use("/api/v1", userRouter);
+app.use("/api/v1/users", userRouter);
 app.use("/api/v1", roomTypesRouter);
 app.use("/api/v1", roomsRouter);
 

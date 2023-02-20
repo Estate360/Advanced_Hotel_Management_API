@@ -8,13 +8,13 @@ router.post("/register", authController.register);
 router.post("/login", authController.login);
 
 router
-  .route("/users")
-  .post(userController.createUser)
+  .route("/")
   .get(
     authController.protect,
-    authController.restrictTo("admin"),
+    // authController.restrictTo("admin"),
     userController.getAllUsers
-  );
+  )
+  .post(userController.createUser);
 
 router
   .route("/:id")

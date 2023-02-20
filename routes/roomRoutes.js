@@ -1,16 +1,19 @@
 const express = require("express");
 const authController = require("../controllers/authController");
 const roomController = require("../controllers/roomController");
-// const userController = require("../controllers/userController");
 
 const router = express.Router();
 
-router.use(authController.protect);
 router
   .route("/rooms")
   .get(roomController.findAllRooms)
-  .post(authController.restrictTo("admin"), roomController.createRoom);
+  .post(
+    authController.protect,
+    authController.restrictTo("admin"),
+    roomController.createRoom
+  );
 
+router.use(authController.protect);
 router
   .route("/rooms/:id")
   .get(roomController.findOneRoom)

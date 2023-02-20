@@ -10,7 +10,7 @@ exports.createUser = (req, res) => {
 };
 
 exports.getOneUser = catchAsync(async (req, res, next) => {
-  const user = User.findById(req.params.id);
+  const user = await User.findById(req.params.id);
 
   if (!user) {
     return next(
@@ -39,7 +39,7 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
     message: "All users successfully fetched",
     result: user.length,
     data: {
-      data: user,
+      user,
     },
   });
 });
