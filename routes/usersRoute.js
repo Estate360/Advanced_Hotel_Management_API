@@ -9,17 +9,14 @@ router.post("/login", authController.login);
 
 router
   .route("/")
-  .get(
-    authController.protect,
-    // authController.restrictTo("admin"),
-    userController.getAllUsers
-  )
+  .get(authController.protect, userController.getAllUsers)
   .post(userController.createUser);
-
+router.use(authController.protect);
 router
   .route("/:id")
   .get(userController.getOneUser)
-  .patch(userController.updateUser)
-  .delete(userController.deleteUser);
+  .patch( userController.updateUser)
+
+  .delete(authController.restrictTo("admin"), userController.deleteUser);
 
 module.exports = router;

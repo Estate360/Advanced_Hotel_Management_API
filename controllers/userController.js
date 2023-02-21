@@ -5,7 +5,9 @@ const AppErrorHandler = require("../utils/AppErrorHandler");
 exports.createUser = (req, res) => {
   res.status(500).json({
     status: "error!",
-    message: "This route is not defined!, please use /api/v1/register",
+    message: `This route is not defined!, please use ${req.protocol}://${req.get(
+      "host"
+    )}/api/v1/users/register`,
   });
 };
 

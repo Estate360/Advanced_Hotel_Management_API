@@ -42,14 +42,14 @@ const userSchema = new mongoose.Schema(
 );
 
 // //PRE-SAVE MIDDLEWARE
-// userSchema.pre("save", async function (next) {
-//   if (!this.isModified("password")) return next();
-//   //password hashed with salt 12
-//   this.password = await bcrypt.hash(this.password, 12);
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  //password hashed with salt 12
+  this.password = await bcrypt.hash(this.password, 12);
 
-//   this.confirmPassword = undefined;
-//   next();
-// });
+  this.confirmPassword = undefined;
+  next();
+});
 
 // //INSTANCE METHOD DEFINITION;
 // userSchema.methods.checkCorrectPassword = async function (

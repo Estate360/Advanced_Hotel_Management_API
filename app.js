@@ -26,7 +26,6 @@ app.use("*", (req, res, next) => {
   next(
     new AppErrorHandler(`Can't find ${req.originalUrl} on this Server!`, 404)
   );
-  console.log(error.stack);
 });
 
 //Database Connection
