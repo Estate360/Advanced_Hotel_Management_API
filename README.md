@@ -62,6 +62,6 @@ If you're interested in contributing to this project, please feel free to fork t
 
 ### License
 
-This project is licensed under the MIT License. See the [LICENSE](https://chat.openai.com/chat/LICENSE) file for more information.
+This project is licensed under the MIT License. See the [LICENSE](https://opensource.org/licenses/MIT) file for more information.
 
 #### Leave a Star ⭐️ if you find this helpful or worth a Start
